@@ -1,0 +1,16 @@
+-- We want to start by looking at our data and familiarise ourselves with the various columns and data types.
+
+SELECT * 
+FROM netflix_titles
+LIMIT 10
+
+-- We find that there are 12 columns in this dataset, including the title, year released, cast list, director, country, description, among others.
+
+-- Next, we want to find out what the distribution between movies and tv shows is like.
+-- The below code calculates the average content type and groups it.
+
+SELECT type, ROUND(COUNT(*) *100 / (SELECT COUNT(*) from netflix_titles ),0) AS perc_total
+FROM netflix_titles 
+GROUP By type
+
+-- Here we find out that 70% of the content is made up of movies, and the remaining 30% of TV shows.
