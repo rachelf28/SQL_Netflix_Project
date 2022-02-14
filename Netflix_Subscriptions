@@ -1,0 +1,73 @@
+-- In this project, we want to investigate if there is a positive correlation between Netflix subscriptions and the average salary. In addition, does the amount of 
+-- content available in a given country affect subscription numbers? The assumption is that the higher the average income then the more likely it is that 
+-- subscription numbers are higher in a given country.
+
+
+-- Let's start by looking at our datasets - there are two in total. First, we look at the Netflix subscriptions dataset.
+
+SELECT * FROM netflix_subs.subscriptions
+LIMIT 10;
+
+-- This dataset gives us the majority of information, including the library size and monthly cost packages per country. The columns are the following:
+-- Country | Total_Library_Size | No__of_TV_Shows | No__of_Movies | Cost_Per_Month___Basic____ | Cost_Per_Month___Standard___ | Cost_Per_Month___Premium____
+
+SELECT COUNT(*) FROM netflix_subs.subscriptions;
+-- There are a total of 65 rows in this set.
+
+-- Next, let's understand the split between the two types of content across the countries.
+
+SELECT
+    Country AS country,
+    ROUND((No__of_TV_Shows/Total_Library_Size),2) AS perc_tv,
+    ROUND((No__of_Movies/Total_Library_Size),2) AS perc_movies,
+    Total_Library_Size AS total_library
+ FROM netflix_subs.subscriptions
+ ORDER BY Total_Library_Size;
+
+-- From the above, it seems that we have roughly a 65%-70% weighting towards TV shows and 35%-30% towards Movies, but let's be sure by calculating
+-- the average values across the dataset.
+
+SELECT AVG((No__of_TV_Shows/Total_Library_Size)) AS perc_tv_total
+FROM netflix_subs.subscriptions; -- 66% TV Shows
+
+SELECT AVG((No__of_Movies/Total_Library_Size)) AS pec_movies_total
+FROM netflix_subs.subscriptions; -- 34% Movies
+
+
+-- Next, we look at the salary data.
+
+SELECT * FROM avg_salary.salary
+LIMIT 10;
+-- This dataset gives us the average income per country. It contains the below colums:
+-- Country | MedianIncome | MeanIncome | Pop2022
+
+SELECT COUNT(*) FROM avg_salary.salary;
+-- We have a total of 162 in this set.
+
+-- Although Netflix is available in 190 countries as of 2022, we only have data for 65, so let's look at these.
+-- A left join will ensure that we're looking at combined data from both tables where only the countries available in our Netflix dataset will be available.
+-- Let's create a temporary table to save us time and avoid repeating the same query too many times.
+
+WITH subscription_data AS (
+    SELECT 
+        Country AS country,
+        Total_Library_Size AS library_size,
+        No__of_TV_Shows AS tv_shows,
+        No__of_Movies AS movies,
+        Cost_Per_Month___Basic____ AS basic_cost,
+        Cost_Per_Month___Standard____ AS standard_cost,
+        Cost_Per_Month___Premium____ AS premium_cost,
+        meanIncome AS avg_income
+        FROM netflix_subs.subscriptions
+        JOIN
+        avg_salary.salary
+        ON Country = _country_
+)
+
+SELECT * FROM subscription_data
+ORDER BY library_size DESC
+
+-- From the above query, we can see that the top 5 countries with the largest libraries are:
+-- Interestingly enough, before this analysis began, one of the assumptions made was that the US and India would have the largest library
+-- sizes. Perhaps due to the size of the population, and also because Netflix is a company from the US. Here, we see that India comes in 14th,
+-- immediately followed by the US at 15th.
