@@ -59,7 +59,6 @@ SELECT COUNT(*) FROM avg_salary.salary;
 -- A left join will ensure that we're looking at combined data from both tables where only the countries available in our Netflix dataset will be available.
 -- Let's create a temporary table to save us time and avoid repeating the same query too many times.
 
-
 WITH subscription_data AS (
     SELECT 
         Country AS country,
@@ -137,6 +136,3 @@ FROM subscription_data; -- 0.07
 
 -- With this, we can conclude that Netflix subscriptions prices have a positive correlation with average income based on data from 65 countries. However,
 -- there is no correlation between prices and library size.
-
-
-
