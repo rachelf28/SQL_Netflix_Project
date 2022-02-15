@@ -132,7 +132,7 @@ FROM subscription_data; -- 0.07
 
 -- This is unsurprising because Netflix updates its library frequently. If it were to change its pricing depending on library size it would be a poor business
 -- model where it would have to maintain a similar number of items constantly, otherwise if prices increased due to library size it would not have a strong
--- popularity or even customers!
+-- popularity or even the millions of customers it has!
 
 -- With this, we can conclude that Netflix subscriptions prices have a positive correlation with average income based on data from 65 countries. However,
 -- there is no correlation between prices and library size.
