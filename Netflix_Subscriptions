@@ -1,6 +1,6 @@
 -- In this project, we want to investigate if there is a positive correlation between Netflix subscriptions and the average salary. In addition, does the amount of 
 -- content available in a given country affect subscription numbers? The assumption is that the higher the average income then the more likely it is that 
--- subscription numbers are higher in a given country.
+-- subscription prices are higher in a given country.
 
 
 -- Let's start by looking at our datasets - there are two in total. First, we look at the Netflix subscriptions dataset.
@@ -33,6 +33,14 @@ FROM netflix_subs.subscriptions; -- 66% TV Shows
 SELECT AVG((No__of_Movies/Total_Library_Size)) AS pec_movies_total
 FROM netflix_subs.subscriptions; -- 34% Movies
 
+-- Looking at library size:
+
+SELECT * FROM netflix_subs.subscriptions
+ORDER BY Total_Library_Size DESC
+
+-- From the above query, we can see that the top 5 countries with the largest libraries are: Czechia, Slovakia, Hungary, Bulgaria, and United Kingdom.
+-- Interestingly enough, before this analysis began, one of the assumptions made was that the US would have the largest library sizes.
+-- This was expected due to the popularity of the platform, and also because Netflix is an US company. Here, we see that the US in fact comes in 15th place.
 
 -- Next, we look at the salary data.
 
@@ -44,9 +52,13 @@ LIMIT 10;
 SELECT COUNT(*) FROM avg_salary.salary;
 -- We have a total of 162 in this set.
 
+-- Now that we've had some time to explore the datasets and get familiarised with them, it's time to perform some statistical analysis to confirm if the hypothesis
+-- of the project holds true.
+
 -- Although Netflix is available in 190 countries as of 2022, we only have data for 65, so let's look at these.
 -- A left join will ensure that we're looking at combined data from both tables where only the countries available in our Netflix dataset will be available.
 -- Let's create a temporary table to save us time and avoid repeating the same query too many times.
+
 
 WITH subscription_data AS (
     SELECT 
@@ -64,10 +76,67 @@ WITH subscription_data AS (
         ON Country = _country_
 )
 
-SELECT * FROM subscription_data
-ORDER BY library_size DESC
+SELECT
+CORR(basic_cost, avg_income) AS basic_sub_salary_correlation
+FROM subscription_data;
 
--- From the above query, we can see that the top 5 countries with the largest libraries are:
--- Interestingly enough, before this analysis began, one of the assumptions made was that the US and India would have the largest library
--- sizes. Perhaps due to the size of the population, and also because Netflix is a company from the US. Here, we see that India comes in 14th,
--- immediately followed by the US at 15th.
+-- The result of the above query tells us that the correlation between the basic subscription price and the average salary is 0.57. This means there is 
+-- there is a moderate positive correlation between these variables.
+
+-- What about standard and premium prices?
+
+SELECT
+CORR(standard_cost, avg_income) AS standard_sub_salary_correlation
+FROM subscription_data; -- 0.70
+
+SELECT
+CORR(premium_cost, avg_income) AS premium_sub_salary_correlation
+FROM subscription_data; -- 0.76
+
+-- The correlation gets closer to 1 as we look at higher price bands. However, this is expected because our average salary variable is not changing, whilst
+-- the subscription price is changing every time we calculate the correlation, but we can see an increasing trend and a strong positive correlation for
+-- standard and premium subscriptions.
+
+-- We can then come to a conclusion that looking at all the variables there is a correlation between Netflix subscription prices and the average salary.
+
+-- Finally, we want to understand if library size plays any part in subscription prices, so we go through a similar process.
+
+WITH subscription_data AS (
+    SELECT 
+        Country AS country,
+        Total_Library_Size AS library_size,
+        No__of_TV_Shows AS tv_shows,
+        No__of_Movies AS movies,
+        Cost_Per_Month___Basic____ AS basic_cost,
+        Cost_Per_Month___Standard____ AS standard_cost,
+        Cost_Per_Month___Premium____ AS premium_cost,
+        meanIncome AS avg_income
+        FROM netflix_subs.subscriptions
+        JOIN
+        avg_salary.salary
+        ON Country = _country_
+)
+
+SELECT
+CORR(basic_cost, library_size) AS basic_sub_library_correlation
+FROM subscription_data;
+
+-- The number 0.02 immediately tells us that there is no relationship between the two variables. We can further check by looking at the other price bands.
+
+SELECT
+CORR(standard_cost, library_size) AS standard_sub_library_correlation
+FROM subscription_data; -- 0.09
+
+SELECT
+CORR(premium_cost, library_size) AS premium_sub_library_correlation
+FROM subscription_data; -- 0.07
+
+-- This is unsurprising because Netflix updates its library frequently. If it were to change its pricing depending on library size it would be a poor business
+-- model where it would have to maintain a similar number of items constantly, otherwise if prices increased due to library size it would not have a strong
+-- popularity or even customers!
+
+-- With this, we can conclude that Netflix subscriptions prices have a positive correlation with average income based on data from 65 countries. However,
+-- there is no correlation between prices and library size.
+
+
+
