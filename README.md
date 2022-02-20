@@ -1,4 +1,4 @@
-# Hi there!
+## Netflix Subscription Prices relationship with Median Salary
 
 Welcome to my first SQL project!
 
